@@ -38,16 +38,24 @@ export interface TableSchema {
   foreign_keys: ForeignKey[];
 }
 
+export interface RuleExpectation {
+  expectation_type: string;
+  kwargs: Record<string, any>;
+}
+
 export interface Rule {
   id: number;
   name: string;
   description: string;
   table_name: string;
-  rule_config: {
-    expectation_type: string;
-    kwargs: Record<string, any>;
-  };
+  rule_config: RuleExpectation | RuleExpectation[];
   is_active: boolean;
+  is_draft?: boolean;
+  confidence?: number;
+  created_at?: string;
+  updated_at?: string;
+  columns?: string[];
+  versions?: any[];
 }
 
 export interface RuleCheckResult {
@@ -104,10 +112,79 @@ export interface UpdateRuleRequest {
   name?: string;
   description?: string;
   is_active?: boolean;
-  rule_config?: {
-    expectation_type: string;
-    kwargs: Record<string, any>;
+  rule_config?: RuleExpectation | RuleExpectation[];
+  finalize_draft?: boolean;
+}
+
+// New interfaces for suggested rules
+export interface SuggestedRule {
+  rule_type: string;
+  column: string | null;
+  columns: string[] | null;
+  description: string;
+  rule_config: string;
+  confidence: number;
+}
+
+export interface RuleUpdateSuggestion {
+  rule_id: number;
+  current_config: string;
+  suggested_config: string | Record<string, any>;
+  reason: string;
+  confidence: number;
+}
+
+export interface SuggestRulesResponse {
+  table_name: string;
+  new_rule_suggestions: SuggestedRule[];
+  rule_update_suggestions: RuleUpdateSuggestion[];
+  error: string | null;
+}
+
+export interface ApplySuggestedRulesRequest {
+  table_name: string;
+  new_rule_ids: number[];
+  update_rule_ids: number[];
+}
+
+export interface ApplySuggestedRulesResponse {
+  created_rules: Rule[];
+  updated_rules: Rule[];
+  errors: string[];
+}
+
+export interface ColumnStatistics {
+  min_value?: number;
+  max_value?: number;
+  avg_value?: number;
+  min_length?: number;
+  max_length?: number;
+  avg_length?: number;
+  non_null_count: number;
+  null_count: number;
+}
+
+export interface ComprehensiveTableAnalysisRequest {
+  table_name: string;
+  apply_suggestions: boolean;
+}
+
+export interface ComprehensiveTableAnalysisResponse {
+  table_name: string;
+  column_analysis: {
+    columns: TableSchemaColumn[];
+    sample_data: Record<string, any>[];
   };
+  data_statistics: {
+    row_count: number;
+    column_stats: Record<string, ColumnStatistics>;
+  };
+  rule_suggestions: {
+    new_rule_suggestions: SuggestedRule[];
+    rule_update_suggestions: RuleUpdateSuggestion[];
+  };
+  existing_rules: Rule[];
+  applied_suggestions: ApplySuggestedRulesResponse | null;
 }
 
 // API functions
@@ -166,6 +243,22 @@ export const updateRule = async (ruleId: number, request: UpdateRuleRequest): Pr
 
 export const deleteRule = async (ruleId: number): Promise<void> => {
   await api.delete(`/api/v1/rules/${ruleId}`);
+};
+
+// New API functions for suggesting and applying rules
+export const suggestRules = async (tableName: string): Promise<SuggestRulesResponse> => {
+  const response = await api.get(`/api/v1/tables/${tableName}/suggest-rules`);
+  return response.data;
+};
+
+export const applySuggestedRules = async (request: ApplySuggestedRulesRequest): Promise<ApplySuggestedRulesResponse> => {
+  const response = await api.post(`/api/v1/tables/${request.table_name}/apply-suggested-rules`, request);
+  return response.data;
+};
+
+export const analyzeTable = async (request: ComprehensiveTableAnalysisRequest): Promise<ComprehensiveTableAnalysisResponse> => {
+  const response = await api.post('/api/v1/analyze-table', request);
+  return response.data;
 };
 
 export default api; 
