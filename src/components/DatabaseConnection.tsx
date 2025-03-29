@@ -8,6 +8,7 @@ import {
   CircularProgress,
   Chip,
   Divider,
+  alpha,
 } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
 import StorageIcon from '@mui/icons-material/Storage';
@@ -47,7 +48,14 @@ const DatabaseConnection: React.FC = () => {
   };
 
   return (
-    <Paper sx={{ p: 3, mb: 3 }}>
+    <Paper sx={{ 
+      p: 3, 
+      mb: 3,
+      background: 'linear-gradient(145deg, rgba(255, 152, 0, 0.05) 0%, rgba(255, 152, 0, 0.15) 100%)',
+      boxShadow: '0 8px 16px rgba(0,0,0,0.5)',
+      borderRadius: 8,
+      border: `1px solid ${alpha('#ce93d8', 0.1)}`,
+    }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h6">Database Connection</Typography>
         <Button

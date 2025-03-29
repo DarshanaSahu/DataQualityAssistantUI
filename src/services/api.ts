@@ -72,12 +72,21 @@ export interface RuleExecutionResult {
       evaluated_expectations: number;
       successful_expectations: number;
       unsuccessful_expectations: number;
+      total_rows?: number;
     };
     results?: {
       expectation_type: string;
       success: boolean;
       result: {
         unexpected_values?: string[];
+        element_count?: number;
+        unexpected_count?: number;
+        unexpected_percent?: number;
+      };
+      sample_rows?: Record<string, any>[];
+      kwargs?: {
+        column?: string;
+        [key: string]: any;
       };
     }[];
     error?: string;
@@ -95,6 +104,10 @@ export interface UpdateRuleRequest {
   name?: string;
   description?: string;
   is_active?: boolean;
+  rule_config?: {
+    expectation_type: string;
+    kwargs: Record<string, any>;
+  };
 }
 
 // API functions
