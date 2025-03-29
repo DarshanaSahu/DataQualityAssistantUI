@@ -31,6 +31,19 @@ const darkTheme = createTheme({
       main: '#ce93d8',
     },
   },
+  components: {
+    MuiContainer: {
+      styleOverrides: {
+        root: {
+          paddingLeft: '10 !important',
+          paddingRight: '10 !important',
+          marginLeft: '10 !important', 
+          marginRight: '10 !important',
+          maxWidth: 'none !important'
+        }
+      }
+    }
+  }
 });
 
 const DatabaseInfo = () => {
@@ -93,7 +106,7 @@ const AppContent = () => {
           <DatabaseInfo />
         </Toolbar>
       </AppBar>
-      <Container sx={{ mt: 4 }}>
+      <Container>
         <Routes>
           <Route path="/" element={<TableList />} />
           <Route path="/table/:tableName" element={<TableDetails />} />

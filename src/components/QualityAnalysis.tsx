@@ -509,7 +509,7 @@ const QualityAnalysis: React.FC = () => {
                   </Button>
                   <Button
                     variant="contained"
-                    startIcon={<LightbulbIcon />}
+                    startIcon={suggestRulesMutation.isPending ? <CircularProgress size={20} color="inherit" /> : <LightbulbIcon />}
                     onClick={handleSuggestRules}
                     disabled={suggestRulesMutation.isPending}
                     size="small"
@@ -521,11 +521,11 @@ const QualityAnalysis: React.FC = () => {
                       }
                     }}
                   >
-                    Suggest Rules
+                    {suggestRulesMutation.isPending ? 'Suggesting...' : 'Suggest Rules'}
                   </Button>
                   <Button
                     variant="contained"
-                    startIcon={<AnalyticsIcon />}
+                    startIcon={analyzeTableMutation.isPending ? <CircularProgress size={20} color="inherit" /> : <AnalyticsIcon />}
                     onClick={() => handleAnalyzeTable(false)}
                     disabled={analyzeTableMutation.isPending}
                     size="small"
@@ -537,7 +537,7 @@ const QualityAnalysis: React.FC = () => {
                       }
                     }}
                   >
-                    Analyze Table
+                    {analyzeTableMutation.isPending ? 'Analyzing...' : 'Analyze Table'}
                   </Button>
                   <Button
                     variant="contained"
@@ -584,9 +584,9 @@ const QualityAnalysis: React.FC = () => {
                       Execution Time: {new Date(executionResult.execution_time).toLocaleString()}
                     </Typography>
                   </Box>
-                  <Grid container spacing={2}>
+                  <Grid container spacing={1}>
                     {executionResult.results.map((result) => (
-                      <Grid item xs={12} md={6} lg={4} key={result.rule_id}>
+                      <Grid item xs={12} md={12} lg={12} key={result.rule_id}>
                         <Card sx={{ 
                           background: 'linear-gradient(145deg, rgba(255, 152, 0, 0.05) 0%, rgba(255, 152, 0, 0.15) 100%)',
                           boxShadow: '0 8px 16px rgba(0,0,0,0.5)',
@@ -594,10 +594,10 @@ const QualityAnalysis: React.FC = () => {
                           height: '100%',
                           display: 'flex',
                           flexDirection: 'column',
-                          minHeight: '280px',
+                          minHeight: '300px',
                           overflow: 'visible'
                         }}>
-                          <CardContent sx={{ flexGrow: 1, overflow: 'auto', maxHeight: '240px' }}>
+                          <CardContent sx={{ flexGrow: 1, overflow: 'auto', maxHeight: '100%' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                               {result.success ? (
                                 <CheckCircleIcon color="success" />
@@ -719,6 +719,40 @@ const QualityAnalysis: React.FC = () => {
                               </Button>
                             </CardActions>
                           )}
+                          <Collapse in={expandedSamples[result.rule_id]} timeout="auto" unmountOnExit>
+                            <Box sx={{ p: 2, bgcolor: alpha('#f5f5f5', 0.5), borderRadius: 1, mt: 1 }}>
+                              {result.results?.map((exp, expIdx) => (
+                                exp.sample_rows && exp.sample_rows.length > 0 && (
+                                  <Box key={expIdx} sx={{ mb: 2 }}>
+                                    <Typography variant="subtitle2">
+                                      Failed samples for: {exp.expectation_type}
+                                    </Typography>
+                                    <TableContainer component={Paper} sx={{ mt: 1, maxHeight: 200 }}>
+                                      <Table size="small">
+                                        <TableHead>
+                                          <TableRow>
+                                            {/* Create table headers based on the keys in the first sample row */}
+                                            {exp.sample_rows[0] && Object.keys(exp.sample_rows[0]).map(key => (
+                                              <TableCell key={key}>{key}</TableCell>
+                                            ))}
+                                          </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                          {exp.sample_rows.map((row, rowIdx) => (
+                                            <TableRow key={rowIdx}>
+                                              {Object.values(row).map((value, valIdx) => (
+                                                <TableCell key={valIdx}>{String(value)}</TableCell>
+                                              ))}
+                                            </TableRow>
+                                          ))}
+                                        </TableBody>
+                                      </Table>
+                                    </TableContainer>
+                                  </Box>
+                                )
+                              ))}
+                            </Box>
+                          </Collapse>
                         </Card>
                       </Grid>
                     ))}
@@ -1001,7 +1035,7 @@ const QualityAnalysis: React.FC = () => {
       <Dialog
         open={openSuggestedRulesDialog}
         onClose={() => setOpenSuggestedRulesDialog(false)}
-        maxWidth="md"
+        maxWidth="xl"
         fullWidth
       >
         <DialogTitle>Suggested Rules for {tableName}</DialogTitle>
@@ -1255,8 +1289,9 @@ const QualityAnalysis: React.FC = () => {
               background: 'linear-gradient(45deg, #ce93d8 30%, #ba68c8 90%)',
               color: '#000',
             }}
+            startIcon={applySuggestedRulesMutation.isPending ? <CircularProgress size={20} color="inherit" /> : undefined}
           >
-            Apply Selected Suggestions
+            {applySuggestedRulesMutation.isPending ? 'Applying...' : 'Apply Selected Suggestions'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1265,7 +1300,7 @@ const QualityAnalysis: React.FC = () => {
       <Dialog
         open={openAnalysisDialog}
         onClose={() => setOpenAnalysisDialog(false)}
-        maxWidth="lg"
+        maxWidth="xl"
         fullWidth
       >
         <DialogTitle>Comprehensive Analysis: {tableName}</DialogTitle>
@@ -1341,12 +1376,13 @@ const QualityAnalysis: React.FC = () => {
             onClick={() => handleAnalyzeTable(true)}
             variant="contained"
             disabled={analyzeTableMutation.isPending}
+            startIcon={analyzeTableMutation.isPending ? <CircularProgress size={20} color="inherit" /> : undefined}
             sx={{
               background: 'linear-gradient(45deg, #f48fb1 30%, #f06292 90%)',
               color: '#000',
             }}
           >
-            Apply Suggested Rules
+            {analyzeTableMutation.isPending ? 'Applying...' : 'Apply Suggested Rules'}
           </Button>
         </DialogActions>
       </Dialog>
