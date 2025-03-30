@@ -52,11 +52,14 @@ The application will be available at `http://localhost:3000`
 The application expects the following API endpoints:
 
 ### Tables
-- `GET /api/tables` - Get list of tables
-- `GET /api/tables/:tableName/metadata` - Get table metadata and schema
-- `GET /api/tables/:tableName/quality-rules` - Get quality rules for a table
-- `POST /api/tables/:tableName/quality-rules` - Add a new quality rule
-- `DELETE /api/tables/:tableName/quality-rules/:ruleId` - Delete a quality rule
+- `GET /api/v1/tables` - Get list of tables
+- `GET /api/v1/database/tables/{tableName}/schema` - Get table metadata and schema
+- `GET /api/v1/rules` - Get rules for a table
+- `POST /api/v1/rules/generate` - Add a new rule
+- `DELETE /api/v1/rules/{ruleId}` - Delete a rule
+- `GET /api/v1/tables/{tableName}/suggest-rules` - Suggests rule for the table
+- `POST /api/v1/tables/{tableName}/apply-suggested-rules` - Apply suggested rule on the table
+- `POST /api/v1/rules/execute` - Executes a rule on the table
 
 ## Building for Production
 
